@@ -1,7 +1,6 @@
 {
   "expo": {
-    "name": "",
-    "slug": "",
+  
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -9,7 +8,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "strings": {
+        "app_name": "WedStoryes"
+      },
+      "package": "com.anonymous"
     },
     "web": {
       "output": "static",

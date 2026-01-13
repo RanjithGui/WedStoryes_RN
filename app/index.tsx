@@ -9,6 +9,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+
+
 const { height } = Dimensions.get("window");
 
 export default function Index() {
@@ -25,12 +27,6 @@ export default function Index() {
       player.play();
     }
   );
-   useEffect(() => {
-    return () => {
-      player.pause();
-      player.release();
-    };
-  }, []);
 
   useEffect(() => {
     jump1.value = withRepeat(withTiming(-18, { duration: 400 }), -1, true);
