@@ -25,16 +25,16 @@ export type OwnerDetails = {
 
 /* ---------- PHOTOGRAPHERS ---------- */
 export type Photographers = {
-  nop?: number | null;
-  type?: string | null;
+  traditional?: number | null;
+  candid?: number | null;
   price?: string | null;
   details?: string | null;
 };
 
 /* ---------- VIDEOGRAPHERS ---------- */
 export type Videographers = {
-  nop?: number | null;
-  type?: string | null;
+  traditional?: number | null;
+  candid?: number | null;
   price?: string | null;
   details?: string | null;
 };

@@ -16,6 +16,7 @@ type GlobalActions = {
 
   setEventDetails: (details: SubEventDetails[]) => void;
   setSelectedLogo: (uri: string | null) => void;
+  setSelectedEventItem: (eventItem: EventItem | null) => void;
 
   resetToDefaults: () => void;
 };
@@ -92,6 +93,8 @@ export const useGlobalStore = create<GlobalStore>()(
           selectedEventItem: null,
           eventDetails: [],
         }),
+
+      setSelectedEventItem: (eventItem) => set({ selectedEventItem: eventItem }),
 
       setEventDetails: (details) => set({ eventDetails: details }),
 

@@ -1,3 +1,4 @@
+import InputDialog from "@/components/inputdialog";
 import { EventItem } from "@/types/types";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -10,35 +11,30 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobalStore } from "../store/globalstore";
 
-
 export default function Homepage() {
-     const router = useRouter();
+  const router = useRouter();
 
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [deleteIndex, setDeleteIndex] = useState<number>(-1);
+  const canGoBack = router.canGoBack();
 
   const onProceed = () => {
     if (selectedIndex === -1) {
       Alert.alert("Please select the Event");
       return;
     }
-  //  router.push("/next-screen");
+    router.push("/eventdetailsscreen");
   };
-//     const EVENTS: EventItem[] = [
-//   { id: "wedding", title: "Wedding", thumbnail: require("../assets/gifs/wedding.gif") },
-//   { id: "engagement", title: "Engagement", thumbnail: require("../assets/gifs/corporate.gif") },
-//   { id: "birthday", title: "Birthday", thumbnail: require("../assets/gifs/birthday.gif") },
-//   { id: "corporate", title: "Corporate", thumbnail: require("../assets/gifs/babyshower.gif") },
-//   { id: "customevent", title: "Custom Event", thumbnail: require("../assets/gifs/customevent.gif") },
-// ];
   const events = useGlobalStore((s) => s.events);
   const selectEvent = useGlobalStore((s) => s.selectEventByIndex);
+  const addCustomEvent = useGlobalStore((s) => s.addCustomEvent);
+  const setSelectedEventItem = useGlobalStore((s) => s.setSelectedEventItem);
+  const [showDialog, setShowDialog] = useState(false);
 
-
-
-     const renderItem = ({ item, index }: { item: EventItem; index: number }) => {
+  const renderItem = ({ item, index }: { item: EventItem; index: number }) => {
     const isSelected = selectedIndex === index;
     const showDelete = deleteIndex === index && item.id === item.title;
 
@@ -48,16 +44,26 @@ export default function Homepage() {
           onPress={() => {
             setSelectedIndex(index);
             if (item.id === "customevent") {
-              Alert.prompt(
-                "Custom Event",
-                "Enter event name",
-                (text) => {
-                  if (text) {
-                    setSelectedIndex(index);
-                    onProceed();
-                  }
-                }
-              );
+              setShowDialog(true);
+              // Alert.prompt("Custom Event", "Enter event name", (text) => {
+              //   if (text) {
+              //     const newEvent = {
+              //       id: text,
+              //       title: text,
+              //       videoUri: require("../assets/gifs/customevent.gif"),
+              //       eventDetails: [],
+              //     };
+              //     addCustomEvent(newEvent);
+              //     setSelectedEventItem(newEvent);
+
+              //     const updatedEvents = useGlobalStore.getState().events;
+              //     const newEventIndex = updatedEvents.findIndex(
+              //       (e) => e.id === text,
+              //     );
+              //     setSelectedIndex(newEventIndex);
+              //     onProceed();
+              //   }
+              // });
             }
           }}
           onLongPress={() => {
@@ -67,10 +73,7 @@ export default function Homepage() {
               Alert.alert("You can't delete default events");
             }
           }}
-          style={[
-            styles.card,
-            isSelected && styles.selectedBorder,
-          ]}
+          style={[styles.card, isSelected && styles.selectedBorder]}
         >
           <Image source={item.videoUri} style={styles.gif} />
 
@@ -92,12 +95,18 @@ export default function Homepage() {
     );
   };
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      <Pressable style={styles.back} onPress={() => router.back()}>
+    <SafeAreaView style={styles.container}>
+      <Pressable
+        hitSlop={10}
+        style={styles.backButton}
+        onPress={() => {
+          console.log("first");
+          router.back();
+        }}
+      >
         <Image
           source={require("../assets/images/back_button.png")}
-          style={styles.backIcon}
+          style={{ width: 32, height: 32 }}
         />
       </Pressable>
 
@@ -105,14 +114,18 @@ export default function Homepage() {
       <FlatList
         data={events}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id?? ""}
+        keyExtractor={(item) => item.id ?? ""}
         numColumns={2}
         contentContainerStyle={styles.grid}
       />
 
       {/* Bottom Button */}
       <Pressable
-        style={[
+        style={({ pressed }) => [
+          {
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
           styles.proceedButton,
           selectedIndex === -1 && styles.disabled,
         ]}
@@ -122,7 +135,31 @@ export default function Homepage() {
           {selectedIndex === -1 ? "Select Event Type" : "Proceed"}
         </Text>
       </Pressable>
-    </View>
+      <InputDialog
+        visible={showDialog}
+        title="Add Event"
+        placeholder="Enter Event name"
+        datapicker={false}
+        onCancel={() => setShowDialog(false)}
+        onOk={({ name, date }) => {
+          console.log("Event Added: ", name);
+          const newEvent = {
+            id: name,
+            title: name,
+            videoUri: require("../assets/gifs/customevent.gif"),
+            eventDetails: [],
+          };
+          addCustomEvent(newEvent);
+          setSelectedEventItem(newEvent);
+
+          const updatedEvents = useGlobalStore.getState().events;
+          const newEventIndex = updatedEvents.findIndex((e) => e.id === name);
+          setSelectedIndex(newEventIndex);
+          setShowDialog(false);
+          onProceed();
+        }}
+      />
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
@@ -131,10 +168,12 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
 
-  back: {
-    marginTop: 54,
-    marginLeft: 26,
-    marginBottom: 12,
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 44,
   },
 
   backIcon: {
@@ -216,4 +255,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
+function usePathname(): any {
+  throw new Error("Function not implemented.");
+}

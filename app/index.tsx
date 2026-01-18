@@ -1,15 +1,20 @@
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect } from "react";
-import { Dimensions, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-
-
 
 const { height } = Dimensions.get("window");
 
@@ -25,7 +30,7 @@ export default function Index() {
       player.loop = true;
       player.muted = true;
       player.play();
-    }
+    },
   );
 
   useEffect(() => {
@@ -37,8 +42,6 @@ export default function Index() {
       jump3.value = withRepeat(withTiming(-18, { duration: 400 }), -1, true);
     }, 800);
   }, []);
-  
- 
 
   const iconStyle = (jump: any) =>
     useAnimatedStyle(() => ({
@@ -46,58 +49,56 @@ export default function Index() {
     }));
 
   return (
-  <View style={styles.container}>
-    <VideoView
-      style={StyleSheet.absoluteFill}
-      player={player}
-      contentFit="cover"
-      nativeControls={false}
-    />
-
-    <View style={styles.overlay}>
-
-      <Image
-        source={require("../assets/images/logo.png")}
-        style={styles.logo}
+    <View style={styles.container}>
+      <VideoView
+        style={StyleSheet.absoluteFill}
+        player={player}
+        contentFit="cover"
+        nativeControls={false}
       />
 
-    
-      <View style={styles.centerContent}>
-        <View style={styles.iconRow}>
-          <Animated.Image
-            source={require("../assets/images/camera.png")}
-            style={[styles.iconLarge, iconStyle(jump1)]}
-          />
-          <Animated.Image
-            source={require("../assets/images/heart_icon.png")}
-            style={[styles.iconSmall, iconStyle(jump2)]}
-          />
-          <Animated.Image
-            source={require("../assets/images/camera.png")}
-            style={[styles.iconLarge, iconStyle(jump3)]}
-          />
+      <View style={styles.overlay}>
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={styles.logo}
+        />
+
+        <View style={styles.centerContent}>
+          <View style={styles.iconRow}>
+            <Animated.Image
+              source={require("../assets/images/camera.png")}
+              style={[styles.iconLarge, iconStyle(jump1)]}
+            />
+            <Animated.Image
+              source={require("../assets/images/heart_icon.png")}
+              style={[styles.iconSmall, iconStyle(jump2)]}
+            />
+            <Animated.Image
+              source={require("../assets/images/camera.png")}
+              style={[styles.iconLarge, iconStyle(jump3)]}
+            />
+          </View>
+
+          <Text style={styles.title}>Capture Your Perfect Moments</Text>
+
+          <Text style={styles.subtitle}>
+            Professional photography and videography services for weddings,
+            events, and special occasions.
+          </Text>
         </View>
 
-        <Text style={styles.title}>Capture Your Perfect Moments</Text>
-
-        <Text style={styles.subtitle}>
-          Professional photography and videography services for weddings, events,
-          and special occasions.
-        </Text>
+        <Pressable
+          style={styles.button}
+          onPress={() => {
+            console.log(" screen");
+            router.push("/homepage");
+          }}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
+        </Pressable>
       </View>
-
-      <Pressable
-        style={styles.button}
-        onPress={() => router.replace("/homepage")}
-      >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </Pressable>
-
     </View>
-  </View>
-);
-
-  
+  );
 }
 const styles = StyleSheet.create({
   container: {
@@ -170,5 +171,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
-
