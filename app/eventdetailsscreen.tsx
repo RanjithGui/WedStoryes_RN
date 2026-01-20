@@ -38,7 +38,7 @@ const EventDetailItem = ({
   );
 
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={() => setIsExpanded(!isExpanded)}>
       <View
         style={{
           flexDirection: "row",
@@ -48,20 +48,15 @@ const EventDetailItem = ({
         }}
       >
         <Text style={styles.eventtitle}>{subEvent?.subEvent}</Text>
-        <Pressable
-          onPress={() => {
-            setIsExpanded(!isExpanded);
-          }}
-        >
-          <Image
-            source={
-              isExpanded
-                ? require("../assets/images/up-arrow.png")
-                : require("../assets/images/arrow-down.png")
-            }
-            style={{ width: 18, height: 18 }}
-          />
-        </Pressable>
+
+        <Image
+          source={
+            isExpanded
+              ? require("../assets/images/up-arrow.png")
+              : require("../assets/images/arrow-down.png")
+          }
+          style={{ width: 18, height: 18 }}
+        />
       </View>
       <View style={isExpanded ? styles.expandedView : styles.collapsedView}>
         <Text style={styles.eventdescription}>{subEvent?.date}</Text>
@@ -192,7 +187,7 @@ const EventDetailItem = ({
           </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
