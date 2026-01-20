@@ -1,7 +1,7 @@
 /* ---------- ADDONS ---------- */
 export type Addons = {
   type?: string | null;
-  count?: number;       
+  count?: number;
   price?: string | null;
   details?: string | null;
   sheets?: string | null;
@@ -42,17 +42,17 @@ export type Videographers = {
 /* ---------- SUB EVENT DETAILS ---------- */
 export type SubEventDetails = {
   subEvent?: string | null;
-  photographers?: Photographers[] | null;
-  videographers?: Videographers[] | null;
+  photographers?: Photographers | null;
+  videographers?: Videographers | null;
   date?: string | null;
   time?: string | null;
-  addons?: Addons[] | null;
+  addons?: Addons | null;
 };
 
 /* ---------- EVENT ITEM ---------- */
 export type EventItem = {
-  id?: string | null;
-  title?: string | null;
+  id?: string;
+  title?: string;
 
   videoUri?: any;
 
@@ -76,6 +76,7 @@ export type GlobalState = {
 
   selectedEventItemIndex: number;
   selectedEventItem: EventItem | null;
+  selectedEventId: string | null;
 
   eventDetails: SubEventDetails[];
   selectedLogo: string | null;

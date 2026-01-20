@@ -6,6 +6,7 @@ export const initialGlobalState: GlobalState = {
   events: DEFAULT_EVENTS,
   selectedEventItemIndex: -1,
   selectedEventItem: null,
+  selectedEventId: null as string | null,
   eventDetails: [],
   selectedLogo: null,
 };

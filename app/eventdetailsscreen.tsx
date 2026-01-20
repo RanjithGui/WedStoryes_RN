@@ -12,9 +12,31 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Counter from "../components/counter";
 
-const EventDetailItem = ({ item }: { item: SubEventDetails }) => {
+const EventDetailItem = ({
+  eventid,
+  subEventIndex,
+}: {
+  eventid: string;
+  subEventIndex: number;
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const subEvent = useGlobalStore(
+    (s) =>
+      s.events.find((e) => e.id === eventid)?.eventDetails?.[subEventIndex],
+  );
+  const newEventIndex = useGlobalStore((s) =>
+    s.events.findIndex((e) => e.id === eventid),
+  );
+
+  const updatePhotoGraphersCount = useGlobalStore(
+    (s) => s.updatePhotoGraphersCount,
+  );
+  const updateVideographersCount = useGlobalStore(
+    (s) => s.updateVideographersCount,
+  );
+
   return (
     <View style={styles.card}>
       <View
@@ -25,7 +47,7 @@ const EventDetailItem = ({ item }: { item: SubEventDetails }) => {
           alignItems: "center",
         }}
       >
-        <Text style={styles.eventtitle}>{item.subEvent}</Text>
+        <Text style={styles.eventtitle}>{subEvent?.subEvent}</Text>
         <Pressable
           onPress={() => {
             setIsExpanded(!isExpanded);
@@ -42,7 +64,133 @@ const EventDetailItem = ({ item }: { item: SubEventDetails }) => {
         </Pressable>
       </View>
       <View style={isExpanded ? styles.expandedView : styles.collapsedView}>
-        <Text style={styles.eventdescription}>{item.date}</Text>
+        <Text style={styles.eventdescription}>{subEvent?.date}</Text>
+        <View
+          style={{
+            backgroundColor: "white",
+            padding: 8,
+            borderRadius: 8,
+            marginTop: 16,
+            paddingHorizontal: 16,
+            paddingVertical: 16,
+          }}
+        >
+          <Text style={styles.eventtitle}>PhotoGraphers</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 8,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.eventdescription}>Traditional</Text>
+            <Counter
+              value={subEvent?.photographers?.traditional || 0}
+              min={0}
+              step={1}
+              onChange={(value) => {
+                updatePhotoGraphersCount(
+                  newEventIndex,
+                  subEventIndex,
+                  "traditional",
+                  value,
+                );
+                console.log(
+                  "Traditional Photographers:",
+                  useGlobalStore.getState().events.find((e) => e.id === eventid)
+                    ?.eventDetails?.[subEventIndex]?.photographers,
+                );
+              }}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 8,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.eventdescription}>Candid</Text>
+            <Counter
+              value={subEvent?.photographers?.candid || 0}
+              min={0}
+              step={1}
+              onChange={(value) => {
+                updatePhotoGraphersCount(
+                  newEventIndex,
+                  subEventIndex,
+                  "candid",
+                  value,
+                );
+              }}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            backgroundColor: "white",
+            padding: 8,
+            borderRadius: 8,
+            marginTop: 16,
+            paddingHorizontal: 16,
+            paddingVertical: 16,
+          }}
+        >
+          <Text style={styles.eventtitle}>VideoGraphers</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 8,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.eventdescription}>Traditional</Text>
+            <Counter
+              value={subEvent?.videographers?.traditional || 0}
+              min={0}
+              step={1}
+              onChange={(value) => {
+                updateVideographersCount(
+                  newEventIndex,
+                  subEventIndex,
+                  "traditional",
+                  value,
+                );
+                console.log(
+                  "Traditional Video:",
+                  useGlobalStore.getState().events.find((e) => e.id === eventid)
+                    ?.eventDetails?.[subEventIndex]?.videographers,
+                );
+              }}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 8,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.eventdescription}>Candid</Text>
+            <Counter
+              value={subEvent?.videographers?.candid || 0}
+              min={0}
+              step={1}
+              onChange={(value) => {
+                updateVideographersCount(
+                  newEventIndex,
+                  subEventIndex,
+                  "candid",
+                  value,
+                );
+              }}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -50,10 +198,15 @@ const EventDetailItem = ({ item }: { item: SubEventDetails }) => {
 
 export default function eventdetailsscreen() {
   const router = useRouter();
-  const selectedEvent = useGlobalStore((s) => s.selectedEventItem);
+  const selectedEvent = useGlobalStore((s) =>
+    s.events.find((e) => e.id === s.selectedEventId),
+  );
   const selectedEventDetails = selectedEvent?.eventDetails || [];
   const [showDialog, setShowDialog] = useState(false);
   const updateEvent = useGlobalStore((s) => s.updateEvent);
+  const addSubEvent = useGlobalStore((s) => s.addSubEvent);
+  console.log("Selected Event:", selectedEvent);
+  console.log("Selected Event Title:", selectedEvent?.title);
 
   const addevent = () => {
     setShowDialog(true);
@@ -66,7 +219,6 @@ export default function eventdetailsscreen() {
           hitSlop={10}
           style={styles.backButton}
           onPress={() => {
-            console.log("first");
             router.back();
           }}
         >
@@ -80,7 +232,13 @@ export default function eventdetailsscreen() {
       <FlatList
         style={styles.grid}
         data={selectedEventDetails}
-        renderItem={({ item }) => <EventDetailItem item={item} />}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ index }) => (
+          <EventDetailItem
+            eventid={selectedEvent?.id || ""}
+            subEventIndex={index}
+          />
+        )}
       />
       <Pressable
         onPress={() => {
@@ -120,7 +278,10 @@ export default function eventdetailsscreen() {
             subEvent: name,
             date: date.toDateString(),
           };
-          selectedEventDetails.push(newSubEvent);
+          //selectedEventDetails.push(newSubEvent);
+          if (selectedEvent?.id) {
+            addSubEvent(selectedEvent.id, newSubEvent);
+          }
           setShowDialog(false);
         }}
       />

@@ -26,12 +26,24 @@ export default function Homepage() {
       Alert.alert("Please select the Event");
       return;
     }
+    const updatedEvents = useGlobalStore.getState().events;
+    const newEventIndex = updatedEvents.findIndex(
+      (e) => e.id === updatedEvents[selectedIndex].id,
+    );
+    if (updatedEvents[newEventIndex]?.id) {
+      setSelectedEventId(updatedEvents[newEventIndex].id);
+    }
+    
+
+    console.log(newEventIndex.toString());
+    useGlobalStore.getState().selectEventByIndex(newEventIndex);
     router.push("/eventdetailsscreen");
   };
   const events = useGlobalStore((s) => s.events);
   const selectEvent = useGlobalStore((s) => s.selectEventByIndex);
   const addCustomEvent = useGlobalStore((s) => s.addCustomEvent);
   const setSelectedEventItem = useGlobalStore((s) => s.setSelectedEventItem);
+  const setSelectedEventId = useGlobalStore((s) => s.setSelectedEventId);
   const [showDialog, setShowDialog] = useState(false);
 
   const renderItem = ({ item, index }: { item: EventItem; index: number }) => {
@@ -45,25 +57,6 @@ export default function Homepage() {
             setSelectedIndex(index);
             if (item.id === "customevent") {
               setShowDialog(true);
-              // Alert.prompt("Custom Event", "Enter event name", (text) => {
-              //   if (text) {
-              //     const newEvent = {
-              //       id: text,
-              //       title: text,
-              //       videoUri: require("../assets/gifs/customevent.gif"),
-              //       eventDetails: [],
-              //     };
-              //     addCustomEvent(newEvent);
-              //     setSelectedEventItem(newEvent);
-
-              //     const updatedEvents = useGlobalStore.getState().events;
-              //     const newEventIndex = updatedEvents.findIndex(
-              //       (e) => e.id === text,
-              //     );
-              //     setSelectedIndex(newEventIndex);
-              //     onProceed();
-              //   }
-              // });
             }
           }}
           onLongPress={() => {
