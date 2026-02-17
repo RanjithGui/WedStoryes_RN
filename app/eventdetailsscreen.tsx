@@ -4,6 +4,7 @@ import { SubEventDetails } from "@/types/types";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   Pressable,
@@ -11,6 +12,7 @@ import {
   Text,
   View,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Counter from "../components/counter";
 
@@ -22,6 +24,17 @@ const EventDetailItem = ({
   subEventIndex: number;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<string[]>([]);
+  const [items, setItems] = useState([
+    { label: "Drone", value: "drone" },
+    { label: "Albums", value: "albums" },
+    { label: "Led Screen", value: "ledscreens" },
+    { label: "Live Streaming", value: "livestreaming" },
+    { label: "Makeup Artist", value: "makeupartist" },
+    { label: "Decorations", value: "decorations" },
+    { label: "Invitations", value: "invitations" },
+  ]);
   const subEvent = useGlobalStore(
     (s) =>
       s.events.find((e) => e.id === eventid)?.eventDetails?.[subEventIndex],
@@ -36,9 +49,56 @@ const EventDetailItem = ({
   const updateVideographersCount = useGlobalStore(
     (s) => s.updateVideographersCount,
   );
+  const updateAddonsCount = useGlobalStore((s) => s.updateAddonsCount);
+  const getAddonCount = (addon: string) => {
+    switch (addon) {
+      case "drone":
+        return subEvent?.addons?.drone ?? 0;
+      case "albums":
+        return subEvent?.addons?.albums ?? 0;
+      case "ledscreens":
+        return subEvent?.addons?.ledscreens ?? 0;
+      case "livestreaming":
+        return subEvent?.addons?.livestreaming ?? 0;
+      case "makeup":
+        return subEvent?.addons?.makeupartist ?? 0;
+      case "decorations":
+        return subEvent?.addons?.decorations ?? 0;
+      case "invitations":
+        return subEvent?.addons?.invitations ?? 0;
+      default:
+        return 0;
+    }
+  };
+  const deleteSubEvent = useGlobalStore((s) => s.deletesubEvent);
+  const deleteEvent = () => {
+    Alert.alert(
+      "Delete Sub-Event",
+      "Are you sure you want to delete this sub-event?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => handleDeleteSubEvent(),
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  function handleDeleteSubEvent() {
+    deleteSubEvent(eventid, subEventIndex);
+  }
 
   return (
-    <Pressable style={styles.card} onPress={() => setIsExpanded(!isExpanded)}>
+    <Pressable
+      style={[styles.card, { zIndex: 1000 - subEventIndex }]}
+      onPress={() => setIsExpanded(!isExpanded)}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -48,15 +108,29 @@ const EventDetailItem = ({
         }}
       >
         <Text style={styles.eventtitle}>{subEvent?.subEvent}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Pressable
+            onPress={() => {
+              console.log(" first delete");
+              deleteEvent();
+            }}
+          >
+            <Image
+              source={require("../assets/images/bin.png")}
+              style={{ width: 18, height: 18 }}
+            />
+          </Pressable>
 
-        <Image
-          source={
-            isExpanded
-              ? require("../assets/images/up-arrow.png")
-              : require("../assets/images/arrow-down.png")
-          }
-          style={{ width: 18, height: 18 }}
-        />
+          <View style={{ width: 16 }} />
+          <Image
+            source={
+              isExpanded
+                ? require("../assets/images/up-arrow.png")
+                : require("../assets/images/arrow-down.png")
+            }
+            style={{ width: 18, height: 18 }}
+          />
+        </View>
       </View>
       <View style={isExpanded ? styles.expandedView : styles.collapsedView}>
         <Text style={styles.eventdescription}>{subEvent?.date}</Text>
@@ -186,6 +260,69 @@ const EventDetailItem = ({
             />
           </View>
         </View>
+
+        {value.length >= 0 && (
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 8,
+              borderRadius: 8,
+              marginTop: 16,
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+            }}
+          >
+            <View style={{ zIndex: 3000 }}>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                multiple
+                placeholder="Select Addons"
+                mode="BADGE"
+                listMode="MODAL"
+                modalTitle="Select Addons"
+                modalAnimationType="slide"
+                style={styles.dropdown}
+                dropDownContainerStyle={styles.dropdownContainer}
+              />
+            </View>
+
+            <FlatList
+              style={{ marginTop: 16 }}
+              data={value}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginTop: 8,
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={styles.eventdescription}>{item}</Text>
+                  <Counter
+                    value={getAddonCount(item)}
+                    min={0}
+                    step={1}
+                    onChange={(count) => {
+                      updateAddonsCount(
+                        newEventIndex,
+                        subEventIndex,
+                        item,
+                        count,
+                      );
+                    }}
+                  />
+                </View>
+              )}
+            />
+          </View>
+        )}
       </View>
     </Pressable>
   );
@@ -250,7 +387,9 @@ export default function eventdetailsscreen() {
         <Text style={styles.text}>Add Event</Text>
       </Pressable>
       <Pressable
-        onPress={() => {}}
+        onPress={() => {
+          router.push("/clientandpdf");
+        }}
         style={({ pressed }) => [
           styles.confirmbutton,
           {
@@ -259,7 +398,7 @@ export default function eventdetailsscreen() {
           },
         ]}
       >
-        <Text style={styles.text}>Confirm</Text>
+        <Text style={styles.text}>Continue</Text>
       </Pressable>
       <InputDialog
         visible={showDialog}
@@ -356,8 +495,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   expandedView: {
-    maxHeight: 1000,
-    overflow: "hidden",
+    overflow: "visible",
   },
   collapsedView: {
     maxHeight: 0,
@@ -366,5 +504,13 @@ const styles = StyleSheet.create({
   eventdescription: {
     fontSize: 14,
     color: "#333",
+  },
+  dropdown: {
+    borderColor: "#C89B3C",
+    minHeight: 48,
+  },
+
+  dropdownContainer: {
+    borderColor: "#C89B3C",
   },
 });

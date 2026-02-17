@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { EventItem, SubEventDetails } from "../types/types";
+import { ClientDetails, EventItem, SubEventDetails } from "../types/types";
 import { initialGlobalState } from "./initialstate";
 
 type GlobalActions = {
@@ -27,6 +27,12 @@ type GlobalActions = {
     type: "traditional" | "candid",
     count: number,
   ) => void;
+  updateAddonsCount: (
+    eventIndex: number,
+    subEventIndex: number,
+    type: string,
+    count: number,
+  ) => void;
 
   setEventDetails: (details: SubEventDetails[]) => void;
   setSelectedLogo: (uri: string | null) => void;
@@ -34,6 +40,9 @@ type GlobalActions = {
 
   resetToDefaults: () => void;
   setSelectedEventId: (id: string) => void;
+  deletesubEvent: (eventid: string, subEventIndex: number) => void;
+  addclientdetails: (eventid: string, clientDetails: ClientDetails) => void;
+  addTerms: (eventid: string, terms: string) => void;
 };
 
 export type GlobalStore = typeof initialGlobalState & GlobalActions;
@@ -109,6 +118,23 @@ export const useGlobalStore = create<GlobalStore>()(
           }
         }
       },
+      updateAddonsCount: (eventIndex, subEventIndex, type, count) => {
+        const events = [...get().events];
+        const event = events[eventIndex];
+        if (event) {
+          const details = event.eventDetails ? [...event.eventDetails] : [];
+          const subEvent = details[subEventIndex];
+          if (subEvent) {
+            subEvent.addons = {
+              ...subEvent.addons,
+              [type]: count,
+            };
+            details[subEventIndex] = subEvent;
+            events[eventIndex] = { ...event, eventDetails: details };
+            set({ events });
+          }
+        }
+      },
 
       addCustomEvent: (event) => {
         const events = [...get().events];
@@ -167,6 +193,20 @@ export const useGlobalStore = create<GlobalStore>()(
           eventDetails: details,
         });
       },
+      deletesubEvent: (eventid, subEventIndex) => {
+        console.log("deletesubEvent called at", Date.now(), eventid);
+
+        const events = get().events.map((e) => {
+          if (e.id === eventid) {
+            const updatedDetails = e.eventDetails
+              ? e.eventDetails.filter((_, index) => index !== subEventIndex)
+              : [];
+            return { ...e, eventDetails: updatedDetails };
+          }
+          return e;
+        });
+        set({ events });
+      },
 
       setSelectedEventItem: (eventItem) =>
         set({ selectedEventItem: eventItem }),
@@ -177,6 +217,18 @@ export const useGlobalStore = create<GlobalStore>()(
 
       resetToDefaults: () => set({ ...initialGlobalState }),
       setSelectedEventId: (id: string) => set({ selectedEventId: id }),
+      addclientdetails: (eventid: string, clientDetails: any) => {
+        const events = get().events.map((e) =>
+          e.id === eventid ? { ...e, clientDetails } : e,
+        );
+        set({ events });
+      },
+      addTerms: (eventid: string, terms: string) => {
+        const events = get().events.map((e) =>
+          e.id === eventid ? { ...e, termsAndConditions: terms } : e,
+        );
+        set({ events });
+      },
     }),
     {
       name: "WEDSTOREYS_GLOBAL_STATE",

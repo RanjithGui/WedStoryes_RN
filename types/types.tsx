@@ -1,7 +1,12 @@
 /* ---------- ADDONS ---------- */
 export type Addons = {
-  type?: string | null;
-  count?: number;
+  drone?: number | null;
+  albums?: number | null;
+  ledscreens?: number | null;
+  livestreaming?: number | null;
+  makeupartist?: number | null;
+  decorations?: number | null;
+  invitations?: number | null;
   price?: string | null;
   details?: string | null;
   sheets?: string | null;
