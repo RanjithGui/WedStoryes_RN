@@ -43,6 +43,9 @@ export type Videographers = {
   price?: string | null;
   details?: string | null;
 };
+export type selectedAddon = {
+  type: string;
+};
 
 /* ---------- SUB EVENT DETAILS ---------- */
 export type SubEventDetails = {
@@ -52,6 +55,7 @@ export type SubEventDetails = {
   date?: string | null;
   time?: string | null;
   addons?: Addons | null;
+  selectedAddons?: selectedAddon[] | null;
 };
 
 /* ---------- EVENT ITEM ---------- */

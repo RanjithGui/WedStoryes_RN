@@ -1,10 +1,11 @@
 import { useGlobalStore } from "@/store/globalstore";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,10 +20,15 @@ export default function clientAndPdf() {
   );
   const addclientdetails = useGlobalStore((s) => s.addclientdetails);
   const addTerms = useGlobalStore((s) => s.addTerms);
+  const addTotalPriceandDiscount = useGlobalStore(
+    (s) => s.addTotalPriceandDiscount,
+  );
   const selectedEventDetails = selectedEvent?.eventDetails || [];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [terms, setTerms] = useState(
     "1. 50,000/- advance to confirm the booking and balance on event day." +
       "\n" +
@@ -47,6 +53,18 @@ export default function clientAndPdf() {
   );
   const MIN_HEIGHT = 10 * 20;
   const [inputHeight, setInputHeight] = useState(MIN_HEIGHT);
+  useEffect(() => {
+    if (selectedEvent?.clientDetails?.name)
+      setName(selectedEvent.clientDetails.name);
+    if (selectedEvent?.clientDetails?.email)
+      setEmail(selectedEvent.clientDetails.email);
+    if (selectedEvent?.clientDetails?.mobileNumber)
+      setPhone(selectedEvent.clientDetails.mobileNumber);
+    if (selectedEvent?.totalPrice) setPrice(selectedEvent.totalPrice);
+    if (selectedEvent?.totalDiscount) setDiscount(selectedEvent.totalDiscount);
+    if (selectedEvent?.termsAndConditions)
+      setTerms(selectedEvent.termsAndConditions);
+  }, [selectedEvent]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,70 +83,106 @@ export default function clientAndPdf() {
         </Pressable>
         <Text style={styles.title}>{selectedEvent?.title}</Text>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.eventtitle}>Client Details</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder={"Enter Client Name"}
-          style={styles.input}
-        />
-        <TextInput
-          value={phone}
-          onChangeText={setPhone}
-          placeholder={"Enter mobile number"}
-          keyboardType="phone-pad"
-          style={styles.input}
-        />
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder={"Enter Client Email"}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.eventtitle}>Terms and Conditions</Text>
-        <TextInput
-          value={terms}
-          onChangeText={setTerms}
-          placeholder="Enter Terms and Conditions"
-          multiline
-          textAlignVertical="top" // IMPORTANT for Android
-          onContentSizeChange={(e) => {
-            setInputHeight(
-              Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
-            );
+      <ScrollView>
+        <View style={styles.card}>
+          <Text style={styles.eventtitle}>Client Details</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder={"Enter Client Name"}
+            style={styles.input}
+          />
+          <TextInput
+            value={phone}
+            onChangeText={setPhone}
+            placeholder={"Enter mobile number"}
+            keyboardType="phone-pad"
+            style={styles.input}
+          />
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder={"Enter Client Email"}
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.eventtitle}>Client Details</Text>
+          <TextInput
+            value={price}
+            onChangeText={setPrice}
+            placeholder={"Enter Total Price"}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+          <TextInput
+            value={discount}
+            onChangeText={setDiscount}
+            placeholder={"Enter Discount"}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.eventtitle}>Terms and Conditions</Text>
+          <TextInput
+            value={terms}
+            onChangeText={setTerms}
+            placeholder="Enter Terms and Conditions"
+            multiline
+            textAlignVertical="top" // IMPORTANT for Android
+            onContentSizeChange={(e) => {
+              setInputHeight(
+                Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
+              );
+            }}
+            style={[styles.input, { height: inputHeight }]}
+          />
+        </View>
+        <Pressable
+          onPress={() => {
+            if (!name || !email || !phone) {
+              Alert.alert("Error", "Please fill all client details");
+              return;
+            } else if (!price || !discount) {
+              Alert.alert("Error", "Please fill price and discount");
+              return;
+            } else {
+              addclientdetails(
+                selectedEvent?.id || "",
+                {
+                  name,
+                  email,
+                  mobileNumber: phone,
+                  saved: true,
+                },
+                {
+                  name: "The WedStoryes",
+                  email: "wedstoryes@gmail.com",
+                  mobileNumber: "9030709090",
+                  saved: true,
+                },
+              );
+              addTerms(selectedEvent?.id || "", terms);
+              addTotalPriceandDiscount(
+                selectedEvent?.id || "",
+                price,
+                discount,
+              );
+            }
+            router.push("/pdfpreview");
           }}
-          style={[styles.input, { height: inputHeight }]}
-        />
-      </View>
-      <Pressable
-        onPress={() => {
-          if (!name || !email || !phone) {
-            Alert.alert("Error", "Please fill all client details");
-            return;
-          } else {
-            addclientdetails(selectedEvent?.id || "", {
-              name,
-              email,
-              mobileNumber: phone,
-              saved: true,
-            });
-            addTerms(selectedEvent?.id || "", terms);
-          }
-          router.push("/pdfpreview");
-        }}
-        style={({ pressed }) => [
-          styles.button,
-          {
-            opacity: pressed ? 0.8 : 1,
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}
-      >
-        <Text style={styles.text}>Preview PDF</Text>
-      </Pressable>
+          style={({ pressed }) => [
+            styles.button,
+            {
+              opacity: pressed ? 0.8 : 1,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
+        >
+          <Text style={styles.text}>Preview PDF</Text>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }

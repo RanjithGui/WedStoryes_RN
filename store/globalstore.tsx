@@ -1,7 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { ClientDetails, EventItem, SubEventDetails } from "../types/types";
+import {
+  ClientDetails,
+  EventItem,
+  OwnerDetails,
+  selectedAddon,
+  SubEventDetails,
+} from "../types/types";
 import { initialGlobalState } from "./initialstate";
 
 type GlobalActions = {
@@ -41,8 +47,22 @@ type GlobalActions = {
   resetToDefaults: () => void;
   setSelectedEventId: (id: string) => void;
   deletesubEvent: (eventid: string, subEventIndex: number) => void;
-  addclientdetails: (eventid: string, clientDetails: ClientDetails) => void;
+  addclientdetails: (
+    eventid: string,
+    clientDetails: ClientDetails,
+    ownerDetails?: OwnerDetails,
+  ) => void;
   addTerms: (eventid: string, terms: string) => void;
+  addTotalPriceandDiscount: (
+    eventid: string,
+    price: string,
+    discount: string,
+  ) => void;
+  selectedAddon: (
+    eventIndex: number,
+    subEventIndex: number,
+    addon: selectedAddon[],
+  ) => void;
 };
 
 export type GlobalStore = typeof initialGlobalState & GlobalActions;
@@ -217,9 +237,13 @@ export const useGlobalStore = create<GlobalStore>()(
 
       resetToDefaults: () => set({ ...initialGlobalState }),
       setSelectedEventId: (id: string) => set({ selectedEventId: id }),
-      addclientdetails: (eventid: string, clientDetails: any) => {
+      addclientdetails: (
+        eventid: string,
+        clientDetails: any,
+        ownerDetails?: any,
+      ) => {
         const events = get().events.map((e) =>
-          e.id === eventid ? { ...e, clientDetails } : e,
+          e.id === eventid ? { ...e, clientDetails, ownerDetails } : e,
         );
         set({ events });
       },
@@ -227,6 +251,37 @@ export const useGlobalStore = create<GlobalStore>()(
         const events = get().events.map((e) =>
           e.id === eventid ? { ...e, termsAndConditions: terms } : e,
         );
+        set({ events });
+      },
+      addTotalPriceandDiscount: (
+        eventid: string,
+        price: string,
+        discount: string,
+      ) => {
+        const events = get().events.map((e) =>
+          e.id === eventid
+            ? { ...e, totalPrice: price, totalDiscount: discount }
+            : e,
+        );
+        set({ events });
+      },
+      selectedAddon: (
+        eventIndex: number,
+        subEventIndex: number,
+        addon: any,
+      ) => {
+        const events = get().events.map((e) => {
+          if (e.id === get().events[eventIndex]?.id) {
+            const details = e.eventDetails ? [...e.eventDetails] : [];
+            const subEvent = details[subEventIndex];
+            if (subEvent) {
+              subEvent.selectedAddons = addon;
+              details[subEventIndex] = subEvent;
+              return { ...e, eventDetails: details };
+            }
+          }
+          return e;
+        });
         set({ events });
       },
     }),

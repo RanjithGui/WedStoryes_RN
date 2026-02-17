@@ -2,7 +2,7 @@ import InputDialog from "@/components/inputdialog";
 import { useGlobalStore } from "@/store/globalstore";
 import { SubEventDetails } from "@/types/types";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -23,18 +23,6 @@ const EventDetailItem = ({
   eventid: string;
   subEventIndex: number;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState<string[]>([]);
-  const [items, setItems] = useState([
-    { label: "Drone", value: "drone" },
-    { label: "Albums", value: "albums" },
-    { label: "Led Screen", value: "ledscreens" },
-    { label: "Live Streaming", value: "livestreaming" },
-    { label: "Makeup Artist", value: "makeupartist" },
-    { label: "Decorations", value: "decorations" },
-    { label: "Invitations", value: "invitations" },
-  ]);
   const subEvent = useGlobalStore(
     (s) =>
       s.events.find((e) => e.id === eventid)?.eventDetails?.[subEventIndex],
@@ -50,6 +38,24 @@ const EventDetailItem = ({
     (s) => s.updateVideographersCount,
   );
   const updateAddonsCount = useGlobalStore((s) => s.updateAddonsCount);
+  const selectedAddon = useGlobalStore((s) => s.selectedAddon);
+  const selectedAddons = subEvent?.selectedAddons || [];
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<string[]>([]);
+  useEffect(() => {
+    setValue(selectedAddons.map((addon) => addon.type));
+  }, [eventid, subEventIndex]);
+  const [items, setItems] = useState([
+    { label: "Drone", value: "drone" },
+    { label: "Albums", value: "albums" },
+    { label: "Led Screen", value: "ledscreens" },
+    { label: "Live Streaming", value: "livestreaming" },
+    { label: "Makeup Artist", value: "makeupartist" },
+    { label: "Decorations", value: "decorations" },
+    { label: "Invitations", value: "invitations" },
+  ]);
+
   const getAddonCount = (addon: string) => {
     switch (addon) {
       case "drone":
@@ -60,7 +66,7 @@ const EventDetailItem = ({
         return subEvent?.addons?.ledscreens ?? 0;
       case "livestreaming":
         return subEvent?.addons?.livestreaming ?? 0;
-      case "makeup":
+      case "makeupartist":
         return subEvent?.addons?.makeupartist ?? 0;
       case "decorations":
         return subEvent?.addons?.decorations ?? 0;
@@ -278,6 +284,13 @@ const EventDetailItem = ({
                 value={value}
                 items={items}
                 setOpen={setOpen}
+                onChangeValue={(val) => {
+                  selectedAddon(
+                    newEventIndex,
+                    subEventIndex,
+                    (val ?? []).map((type) => ({ type: String(type) })),
+                  );
+                }}
                 setValue={setValue}
                 setItems={setItems}
                 multiple
