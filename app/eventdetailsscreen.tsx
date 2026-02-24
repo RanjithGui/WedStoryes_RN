@@ -2,7 +2,7 @@ import InputDialog from "@/components/inputdialog";
 import { useGlobalStore } from "@/store/globalstore";
 import { SubEventDetails } from "@/types/types";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -10,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -43,25 +44,105 @@ const EventDetailItem = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string[]>([]);
+  // Local state updates instantly (smooth typing)
+  const [description, setDescription] = useState<string | null>(
+    subEvent?.addons?.sheetsDescription ?? null,
+  );
+  const [sheets, setSheets] = useState<number | null>(
+    subEvent?.addons?.sheets ?? null,
+  );
+
+  // Ref to hold the debounce timer
+  const descriptionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sheetsRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleDescriptionChange = (text: string) => {
+    // Update local state immediately so UI feels responsive
+    setDescription(text);
+
+    // Debounce the Zustand write
+    if (descriptionRef.current) clearTimeout(descriptionRef.current);
+
+    descriptionRef.current = setTimeout(() => {
+      console.log("Saving description to store:", text); // 👈 check this fires
+
+      updateAddonsCount(
+        newEventIndex,
+        subEventIndex,
+        "photobook",
+        getAddonCount("photobook"),
+        text, // use `text` directly, not `description` (stale closure!)
+        sheets, // current sheets value
+      );
+    }, 500); // 500ms after user stops typing
+  };
+  const handleSheetsChange = (text: number) => {
+    // Update local state immediately so UI feels responsive
+    setSheets(text);
+
+    // Debounce the Zustand write
+    if (sheetsRef.current) clearTimeout(sheetsRef.current);
+
+    sheetsRef.current = setTimeout(() => {
+      console.log("Saving sheets to store:", text); // 👈 check this fires
+
+      updateAddonsCount(
+        newEventIndex,
+        subEventIndex,
+        "photobook",
+        getAddonCount("photobook"),
+        description ?? null,
+        text, // use `text` directly, not `sheets` (stale closure!)
+      );
+    }, 500); // 500ms after user stops typing
+  };
+
   useEffect(() => {
     setValue(selectedAddons.map((addon) => addon.type));
+    const storedDesc = subEvent?.addons?.sheetsDescription ?? null;
+    const storedSheets = subEvent?.addons?.sheets ?? null; // ✅ null not undefined
+
+    setDescription(storedDesc);
+    setSheets(storedSheets);
+    console.log(
+      "Selected Addons for Sub-Event:",
+      subEvent?.addons?.sheets ?? null,
+    );
+    return () => {
+      if (descriptionRef.current) clearTimeout(descriptionRef.current);
+      if (sheetsRef.current) clearTimeout(sheetsRef.current);
+    };
   }, [eventid, subEventIndex]);
   const [items, setItems] = useState([
     { label: "Drone", value: "drone" },
-    { label: "Albums", value: "albums" },
+    { label: "PhotoBook", value: "photobook" },
     { label: "Led Screen", value: "ledscreens" },
     { label: "Live Streaming", value: "livestreaming" },
     { label: "Makeup Artist", value: "makeupartist" },
     { label: "Decorations", value: "decorations" },
     { label: "Invitations", value: "invitations" },
   ]);
+  const allSubEvents = useGlobalStore(
+    (s) => s.events.find((e) => e.id === eventid)?.eventDetails ?? [],
+  );
 
+  const photobookComplete = allSubEvents.some(
+    (sub) =>
+      (sub?.addons?.photobook ?? 0) > 0 &&
+      sub?.addons?.sheets != null &&
+      sub?.addons?.sheetsDescription != null &&
+      sub?.addons?.sheetsDescription !== "",
+  );
+
+  const filteredItems = photobookComplete
+    ? items.filter((i) => i.value !== "photobook")
+    : items;
   const getAddonCount = (addon: string) => {
     switch (addon) {
       case "drone":
         return subEvent?.addons?.drone ?? 0;
-      case "albums":
-        return subEvent?.addons?.albums ?? 0;
+      case "photobook":
+        return subEvent?.addons?.photobook ?? 0;
       case "ledscreens":
         return subEvent?.addons?.ledscreens ?? 0;
       case "livestreaming":
@@ -282,7 +363,7 @@ const EventDetailItem = ({
               <DropDownPicker
                 open={open}
                 value={value}
-                items={items}
+                items={filteredItems}
                 setOpen={setOpen}
                 onChangeValue={(val) => {
                   selectedAddon(
@@ -309,28 +390,63 @@ const EventDetailItem = ({
               data={value}
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item }) => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    marginTop: 8,
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={styles.eventdescription}>{item}</Text>
-                  <Counter
-                    value={getAddonCount(item)}
-                    min={0}
-                    step={1}
-                    onChange={(count) => {
-                      updateAddonsCount(
-                        newEventIndex,
-                        subEventIndex,
-                        item,
-                        count,
-                      );
+                <View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginTop: 8,
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    <Text style={styles.eventdescription}>{item}</Text>
+                    <Counter
+                      value={getAddonCount(item)}
+                      min={0}
+                      step={1}
+                      onChange={(count) => {
+                        updateAddonsCount(
+                          newEventIndex,
+                          subEventIndex,
+                          item,
+                          count,
+                          item === "photobook"
+                            ? (description ?? null)
+                            : undefined,
+                          item === "photobook" ? sheets : undefined,
+                        );
+                      }}
+                    />
+                  </View>
+                  {item === "photobook" && (
+                    <TextInput
+                      value={description ?? ""}
+                      onChangeText={handleDescriptionChange}
+                      placeholder="Enter description"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#C89B3C",
+                        borderRadius: 6,
+                        padding: 8,
+                        marginTop: 8,
+                      }}
+                    />
+                  )}
+                  {item === "photobook" && (
+                    <TextInput
+                      value={sheets?.toString() ?? ""}
+                      onChangeText={(text) => handleSheetsChange(Number(text))}
+                      placeholder="Enter Sheets"
+                      keyboardType="numeric"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#C89B3C",
+                        borderRadius: 6,
+                        padding: 8,
+                        marginTop: 8,
+                      }}
+                    />
+                  )}
                 </View>
               )}
             />

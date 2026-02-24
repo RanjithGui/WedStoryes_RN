@@ -20,7 +20,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "strings": {
-        "app_name": "WedStoryes"
+        "app_name": ""
       },
       "package": "com.anonymous"
     },
@@ -49,10 +49,15 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-
     "compilerOptions": {
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bfbabdb8-48b1-4500-b2a2-ee9214a1a46e"
+      }
     }
   }
 }

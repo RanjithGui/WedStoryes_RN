@@ -38,6 +38,8 @@ type GlobalActions = {
     subEventIndex: number,
     type: string,
     count: number,
+    sheetsDescription?: string | null,
+    sheets?: number | null,
   ) => void;
 
   setEventDetails: (details: SubEventDetails[]) => void;
@@ -138,16 +140,25 @@ export const useGlobalStore = create<GlobalStore>()(
           }
         }
       },
-      updateAddonsCount: (eventIndex, subEventIndex, type, count) => {
+      updateAddonsCount: (
+        eventIndex,
+        subEventIndex,
+        type,
+        count,
+        sheetsDescription,
+        sheets,
+      ) => {
         const events = [...get().events];
         const event = events[eventIndex];
         if (event) {
           const details = event.eventDetails ? [...event.eventDetails] : [];
-          const subEvent = details[subEventIndex];
+          const subEvent = { ...details[subEventIndex] };
           if (subEvent) {
             subEvent.addons = {
               ...subEvent.addons,
               [type]: count,
+              ...(sheets != null ? { sheets } : {}),
+              ...(sheetsDescription != null ? { sheetsDescription } : {}),
             };
             details[subEventIndex] = subEvent;
             events[eventIndex] = { ...event, eventDetails: details };

@@ -1,7 +1,7 @@
 /* ---------- ADDONS ---------- */
 export type Addons = {
   drone?: number | null;
-  albums?: number | null;
+  photobook?: number | null;
   ledscreens?: number | null;
   livestreaming?: number | null;
   makeupartist?: number | null;
@@ -9,7 +9,8 @@ export type Addons = {
   invitations?: number | null;
   price?: string | null;
   details?: string | null;
-  sheets?: string | null;
+  sheetsDescription?: string | null;
+  sheets?: number | null;
 };
 
 /* ---------- CLIENT DETAILS ---------- */

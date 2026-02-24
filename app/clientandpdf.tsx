@@ -23,6 +23,7 @@ export default function clientAndPdf() {
   const addTotalPriceandDiscount = useGlobalStore(
     (s) => s.addTotalPriceandDiscount,
   );
+  const [photobook, setPhotobook] = useState(Boolean(false));
   const selectedEventDetails = selectedEvent?.eventDetails || [];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
