@@ -19,6 +19,7 @@ export default function Homepage() {
 
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [deleteIndex, setDeleteIndex] = useState<number>(-1);
+  const deleteEvent = useGlobalStore((s) => s.deleteEvent);
   const canGoBack = router.canGoBack();
 
   const onProceed = () => {
@@ -33,7 +34,6 @@ export default function Homepage() {
     if (updatedEvents[newEventIndex]?.id) {
       setSelectedEventId(updatedEvents[newEventIndex].id);
     }
-    
 
     console.log(newEventIndex.toString());
     useGlobalStore.getState().selectEventByIndex(newEventIndex);
@@ -73,7 +73,10 @@ export default function Homepage() {
           {showDelete && (
             <Pressable
               style={styles.deleteButton}
-              onPress={() => setDeleteIndex(-1)}
+              onPress={() => {
+                setDeleteIndex(-1);
+                deleteEvent(item.id?.toString() ?? "");
+              }}
             >
               <Image
                 source={require("../assets/gifs/delete.gif")}
