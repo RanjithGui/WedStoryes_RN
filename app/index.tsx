@@ -2,7 +2,14 @@ import ResponsiveContainer from "@/components/ResponsiveContainer";
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  AppState,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -40,6 +47,19 @@ export default function landingPage() {
   // Re-issue it once VideoView has actually mounted the element.
   useEffect(() => {
     player.play();
+  }, [player]);
+
+  // Browsers (and mobile OSes) commonly pause background media to save
+  // power - switching tabs away and back, or backgrounding the app, can
+  // leave the player paused on a frozen frame. Resume it as soon as we're
+  // foregrounded again so it picks up smoothly instead of staying stuck.
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        player.play();
+      }
+    });
+    return () => subscription.remove();
   }, [player]);
 
   const iconStyle = (jump: any) =>
