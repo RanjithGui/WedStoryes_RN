@@ -1,3 +1,4 @@
+import ResponsiveContainer from "@/components/ResponsiveContainer";
 import { useGlobalStore } from "@/store/globalstore";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -69,121 +70,123 @@ export default function clientAndPdf() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.rowContainer}>
-        <Pressable
-          hitSlop={10}
-          style={styles.backButton}
-          onPress={() => {
-            router.back();
-          }}
-        >
-          <Image
-            source={require("../assets/images/back_button.png")}
-            style={{ width: 32, height: 32 }}
-          />
-        </Pressable>
-        <Text style={styles.title}>{selectedEvent?.title}</Text>
-      </View>
-      <ScrollView>
-        <View style={styles.card}>
-          <Text style={styles.eventtitle}>Client Details</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder={"Enter Client Name"}
-            style={styles.input}
-          />
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            placeholder={"Enter mobile number"}
-            keyboardType="phone-pad"
-            style={styles.input}
-          />
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder={"Enter Client Email"}
-            style={styles.input}
-          />
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.eventtitle}>Client Details</Text>
-          <TextInput
-            value={price}
-            onChangeText={setPrice}
-            placeholder={"Enter Total Price"}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <TextInput
-            value={discount}
-            onChangeText={setDiscount}
-            placeholder={"Enter Discount"}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.eventtitle}>Terms and Conditions</Text>
-          <TextInput
-            value={terms}
-            onChangeText={setTerms}
-            placeholder="Enter Terms and Conditions"
-            multiline
-            textAlignVertical="top" // IMPORTANT for Android
-            onContentSizeChange={(e) => {
-              setInputHeight(
-                Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
-              );
+      <ResponsiveContainer maxWidth={640} style={styles.responsiveBody}>
+        <View style={styles.rowContainer}>
+          <Pressable
+            hitSlop={10}
+            style={styles.backButton}
+            onPress={() => {
+              router.back();
             }}
-            style={[styles.input, { height: inputHeight }]}
-          />
+          >
+            <Image
+              source={require("../assets/images/back_button.png")}
+              style={{ width: 32, height: 32 }}
+            />
+          </Pressable>
+          <Text style={styles.title}>{selectedEvent?.title}</Text>
         </View>
-        <Pressable
-          onPress={() => {
-            if (!name || !email || !phone) {
-              Alert.alert("Error", "Please fill all client details");
-              return;
-            } else if (!price || !discount) {
-              Alert.alert("Error", "Please fill price and discount");
-              return;
-            } else {
-              addclientdetails(
-                selectedEvent?.id || "",
-                {
-                  name,
-                  email,
-                  mobileNumber: phone,
-                  saved: true,
-                },
-                {
-                  name: "The WedStoryes",
-                  email: "wedstoryes@gmail.com",
-                  mobileNumber: "9030709090",
-                  saved: true,
-                },
-              );
-              addTerms(selectedEvent?.id || "", terms);
-              addTotalPriceandDiscount(
-                selectedEvent?.id || "",
-                price,
-                discount,
-              );
-            }
-            router.push("/pdfpreview");
-          }}
-          style={({ pressed }) => [
-            styles.button,
-            {
-              opacity: pressed ? 0.8 : 1,
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-            },
-          ]}
-        >
-          <Text style={styles.text}>Preview PDF</Text>
-        </Pressable>
-      </ScrollView>
+        <ScrollView>
+          <View style={styles.card}>
+            <Text style={styles.eventtitle}>Client Details</Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder={"Enter Client Name"}
+              style={styles.input}
+            />
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              placeholder={"Enter mobile number"}
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder={"Enter Client Email"}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.eventtitle}>Client Details</Text>
+            <TextInput
+              value={price}
+              onChangeText={setPrice}
+              placeholder={"Enter Total Price"}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <TextInput
+              value={discount}
+              onChangeText={setDiscount}
+              placeholder={"Enter Discount"}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.eventtitle}>Terms and Conditions</Text>
+            <TextInput
+              value={terms}
+              onChangeText={setTerms}
+              placeholder="Enter Terms and Conditions"
+              multiline
+              textAlignVertical="top" // IMPORTANT for Android
+              onContentSizeChange={(e) => {
+                setInputHeight(
+                  Math.max(MIN_HEIGHT, e.nativeEvent.contentSize.height),
+                );
+              }}
+              style={[styles.input, { height: inputHeight }]}
+            />
+          </View>
+          <Pressable
+            onPress={() => {
+              if (!name || !email || !phone) {
+                Alert.alert("Error", "Please fill all client details");
+                return;
+              } else if (!price || !discount) {
+                Alert.alert("Error", "Please fill price and discount");
+                return;
+              } else {
+                addclientdetails(
+                  selectedEvent?.id || "",
+                  {
+                    name,
+                    email,
+                    mobileNumber: phone,
+                    saved: true,
+                  },
+                  {
+                    name: "The WedStoryes",
+                    email: "wedstoryes@gmail.com",
+                    mobileNumber: "9030709090",
+                    saved: true,
+                  },
+                );
+                addTerms(selectedEvent?.id || "", terms);
+                addTotalPriceandDiscount(
+                  selectedEvent?.id || "",
+                  price,
+                  discount,
+                );
+              }
+              router.push("/pdfpreview");
+            }}
+            style={({ pressed }) => [
+              styles.button,
+              {
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+              },
+            ]}
+          >
+            <Text style={styles.text}>Preview PDF</Text>
+          </Pressable>
+        </ScrollView>
+      </ResponsiveContainer>
     </SafeAreaView>
   );
 }
@@ -191,6 +194,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     alignContent: "center",
+    flex: 1,
+  },
+  responsiveBody: {
     flex: 1,
   },
   button: {

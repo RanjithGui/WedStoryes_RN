@@ -1,4 +1,5 @@
 import InputDialog from "@/components/inputdialog";
+import ResponsiveContainer from "@/components/ResponsiveContainer";
 import { useGlobalStore } from "@/store/globalstore";
 import { SubEventDetails } from "@/types/types";
 import { useRouter } from "expo-router";
@@ -475,60 +476,62 @@ export default function eventdetailsscreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.rowContainer}>
+      <ResponsiveContainer maxWidth={640} style={styles.responsiveBody}>
+        <View style={styles.rowContainer}>
+          <Pressable
+            hitSlop={10}
+            style={styles.backButton}
+            onPress={() => {
+              router.back();
+            }}
+          >
+            <Image
+              source={require("../assets/images/back_button.png")}
+              style={{ width: 32, height: 32 }}
+            />
+          </Pressable>
+          <Text style={styles.title}>{selectedEvent?.title}</Text>
+        </View>
+        <FlatList
+          style={styles.grid}
+          data={selectedEventDetails}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ index }) => (
+            <EventDetailItem
+              eventid={selectedEvent?.id || ""}
+              subEventIndex={index}
+            />
+          )}
+        />
         <Pressable
-          hitSlop={10}
-          style={styles.backButton}
           onPress={() => {
-            router.back();
+            addevent();
           }}
+          style={({ pressed }) => [
+            styles.button,
+            {
+              opacity: pressed ? 0.8 : 1,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
         >
-          <Image
-            source={require("../assets/images/back_button.png")}
-            style={{ width: 32, height: 32 }}
-          />
+          <Text style={styles.text}>Add Event</Text>
         </Pressable>
-        <Text style={styles.title}>{selectedEvent?.title}</Text>
-      </View>
-      <FlatList
-        style={styles.grid}
-        data={selectedEventDetails}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ index }) => (
-          <EventDetailItem
-            eventid={selectedEvent?.id || ""}
-            subEventIndex={index}
-          />
-        )}
-      />
-      <Pressable
-        onPress={() => {
-          addevent();
-        }}
-        style={({ pressed }) => [
-          styles.button,
-          {
-            opacity: pressed ? 0.8 : 1,
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}
-      >
-        <Text style={styles.text}>Add Event</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => {
-          router.push("/clientandpdf");
-        }}
-        style={({ pressed }) => [
-          styles.confirmbutton,
-          {
-            opacity: pressed ? 0.8 : 1,
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}
-      >
-        <Text style={styles.text}>Continue</Text>
-      </Pressable>
+        <Pressable
+          onPress={() => {
+            router.push("/clientandpdf");
+          }}
+          style={({ pressed }) => [
+            styles.confirmbutton,
+            {
+              opacity: pressed ? 0.8 : 1,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
+        >
+          <Text style={styles.text}>Continue</Text>
+        </Pressable>
+      </ResponsiveContainer>
       <InputDialog
         visible={showDialog}
         title="Add Sub-Event"
@@ -555,6 +558,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     alignContent: "center",
+    flex: 1,
+  },
+  responsiveBody: {
     flex: 1,
   },
   button: {

@@ -38,6 +38,20 @@ export default function InputDialog({
     setShowPicker(false);
   };
 
+  const toInputDateValue = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const onWebDateChange = (e: any) => {
+    const value: string = e.target.value;
+    if (!value) return;
+    const [year, month, day] = value.split("-").map(Number);
+    setDate(new Date(year, month - 1, day));
+  };
+
   return (
     <Modal
       transparent
@@ -58,16 +72,24 @@ export default function InputDialog({
           />
 
           {/* Date Selector */}
-          {datapicker && (
-            <Pressable
-              style={styles.dateField}
-              onPress={() => setShowPicker(true)}
-            >
-              <Text style={styles.dateText}>{date.toDateString()}</Text>
-            </Pressable>
-          )}
+          {datapicker &&
+            (Platform.OS === "web"
+              ? React.createElement("input", {
+                  type: "date",
+                  value: toInputDateValue(date),
+                  onChange: onWebDateChange,
+                  style: webDateInputStyle,
+                })
+              : (
+                  <Pressable
+                    style={styles.dateField}
+                    onPress={() => setShowPicker(true)}
+                  >
+                    <Text style={styles.dateText}>{date.toDateString()}</Text>
+                  </Pressable>
+                ))}
 
-          {showPicker && (
+          {showPicker && Platform.OS !== "web" && (
             <DateTimePicker
               value={date}
               mode="date"
@@ -99,15 +121,29 @@ export default function InputDialog({
     </Modal>
   );
 }
+const webDateInputStyle: React.CSSProperties = {
+  marginTop: 12,
+  padding: 12,
+  borderRadius: 8,
+  border: "1px solid #ccc",
+  color: "#333",
+  fontSize: 14,
+  fontFamily: "inherit",
+  boxSizing: "border-box",
+  width: "100%",
+};
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
+    padding: 16,
   },
   dialog: {
     width: "85%",
+    maxWidth: 420,
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,

@@ -1,3 +1,4 @@
+import ResponsiveContainer from "@/components/ResponsiveContainer";
 import { useGlobalStore } from "@/store/globalstore";
 import {
   Addons,
@@ -11,7 +12,15 @@ import * as Print from "expo-print";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -24,6 +33,7 @@ export default function PDFPreview() {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const router = useRouter();
   const webViewRef = useRef<WebView>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [zoom, setZoom] = useState(1.0);
   const MIN_ZOOM = 0.5;
   const MAX_ZOOM = 3.0;
@@ -86,14 +96,24 @@ export default function PDFPreview() {
       const next = parseFloat(
         Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev + delta)).toFixed(2),
       );
-      webViewRef.current?.injectJavaScript(`
-        (function() {
-          document.body.style.transform = 'scale(${next})';
-          document.body.style.transformOrigin = 'top left';
-          document.body.style.width = (100 / ${next}) + '%';
-        })();
-        true;
-      `);
+      if (Platform.OS === "web") {
+        const frame = iframeRef.current;
+        if (frame) {
+          frame.style.transform = `scale(${next})`;
+          frame.style.transformOrigin = "top left";
+          frame.style.width = `${100 / next}%`;
+          frame.style.height = `${100 / next}%`;
+        }
+      } else {
+        webViewRef.current?.injectJavaScript(`
+          (function() {
+            document.body.style.transform = 'scale(${next})';
+            document.body.style.transformOrigin = 'top left';
+            document.body.style.width = (100 / ${next}) + '%';
+          })();
+          true;
+        `);
+      }
       return next;
     });
   };
@@ -403,61 +423,86 @@ export default function PDFPreview() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.topBar}>
-        <View style={styles.topBarSide}>
-          <Pressable
-            hitSlop={10}
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Image
-              source={require("../assets/images/back_button.png")}
-              style={{ width: 32, height: 32 }}
-            />
-          </Pressable>
+      <ResponsiveContainer maxWidth={900} style={styles.responsiveBody}>
+        <View style={styles.topBar}>
+          <View style={styles.topBarSide}>
+            <Pressable
+              hitSlop={10}
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Image
+                source={require("../assets/images/back_button.png")}
+                style={{ width: 32, height: 32 }}
+              />
+            </Pressable>
+          </View>
+
+          <View style={styles.zoomRow}>
+            <Pressable
+              style={[
+                styles.zoomBtn,
+                zoom <= MIN_ZOOM && styles.zoomBtnDisabled,
+              ]}
+              onPress={() => changeZoom(-ZOOM_STEP)}
+              disabled={zoom <= MIN_ZOOM}
+            >
+              <Text style={styles.zoomBtnText}>−</Text>
+            </Pressable>
+            <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
+            <Pressable
+              style={[
+                styles.zoomBtn,
+                zoom >= MAX_ZOOM && styles.zoomBtnDisabled,
+              ]}
+              onPress={() => changeZoom(+ZOOM_STEP)}
+              disabled={zoom >= MAX_ZOOM}
+            >
+              <Text style={styles.zoomBtnText}>+</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.topBarSide} />
         </View>
 
-        <View style={styles.zoomRow}>
-          <Pressable
-            style={[styles.zoomBtn, zoom <= MIN_ZOOM && styles.zoomBtnDisabled]}
-            onPress={() => changeZoom(-ZOOM_STEP)}
-            disabled={zoom <= MIN_ZOOM}
-          >
-            <Text style={styles.zoomBtnText}>−</Text>
-          </Pressable>
-          <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
-          <Pressable
-            style={[styles.zoomBtn, zoom >= MAX_ZOOM && styles.zoomBtnDisabled]}
-            onPress={() => changeZoom(+ZOOM_STEP)}
-            disabled={zoom >= MAX_ZOOM}
-          >
-            <Text style={styles.zoomBtnText}>+</Text>
-          </Pressable>
+        <View style={styles.webview}>
+          {Platform.OS === "web"
+            ? React.createElement("iframe", {
+                ref: iframeRef,
+                srcDoc: buildHtml(logoBase64),
+                title: "Quotation Preview",
+                style: {
+                  flex: 1,
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                },
+              })
+            : (
+                <WebView
+                  ref={webViewRef}
+                  originWhitelist={["*"]}
+                  source={{ html: buildHtml(logoBase64) }}
+                  style={styles.webview}
+                  javaScriptEnabled={true}
+                  scalesPageToFit={false}
+                  scrollEnabled={true}
+                  bounces={false}
+                />
+              )}
         </View>
 
-        <View style={styles.topBarSide} />
-      </View>
-
-      <WebView
-        ref={webViewRef}
-        originWhitelist={["*"]}
-        source={{ html: buildHtml(logoBase64) }}
-        style={styles.webview}
-        javaScriptEnabled={true}
-        scalesPageToFit={false}
-        scrollEnabled={true}
-        bounces={false}
-      />
-
-      <Pressable onPress={handleDownload} style={styles.button}>
-        <Text style={styles.text}>Download PDF</Text>
-      </Pressable>
+        <Pressable onPress={handleDownload} style={styles.button}>
+          <Text style={styles.text}>Download PDF</Text>
+        </Pressable>
+      </ResponsiveContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  responsiveBody: { flex: 1 },
   webview: { flex: 1 },
   topBar: {
     flexDirection: "row",

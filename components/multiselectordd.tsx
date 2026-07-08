@@ -36,6 +36,9 @@ export default function MultiSelectDropdown() {
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
+    maxWidth: 480,
+    alignSelf: "center",
     padding: 16,
     zIndex: 1000, // VERY IMPORTANT
   },

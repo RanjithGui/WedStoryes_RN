@@ -1,4 +1,5 @@
 import InputDialog from "@/components/inputdialog";
+import ResponsiveContainer from "@/components/ResponsiveContainer";
 import { EventItem } from "@/types/types";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +18,8 @@ import { useGlobalStore } from "../store/globalstore";
 
 export default function Homepage() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
 
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [deleteIndex, setDeleteIndex] = useState<number>(-1);
@@ -107,30 +111,33 @@ export default function Homepage() {
       </Pressable>
 
       {/* Grid */}
-      <FlatList
-        data={events}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id ?? ""}
-        numColumns={2}
-        contentContainerStyle={styles.grid}
-      />
+      <ResponsiveContainer maxWidth={960} style={styles.gridContainer}>
+        <FlatList
+          key={numColumns}
+          data={events}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id ?? ""}
+          numColumns={numColumns}
+          contentContainerStyle={styles.grid}
+        />
 
-      {/* Bottom Button */}
-      <Pressable
-        style={({ pressed }) => [
-          {
-            opacity: pressed ? 0.8 : 1,
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-          styles.proceedButton,
-          selectedIndex === -1 && styles.disabled,
-        ]}
-        onPress={onProceed}
-      >
-        <Text style={styles.proceedText}>
-          {selectedIndex === -1 ? "Select Event Type" : "Proceed"}
-        </Text>
-      </Pressable>
+        {/* Bottom Button */}
+        <Pressable
+          style={({ pressed }) => [
+            {
+              opacity: pressed ? 0.8 : 1,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+            styles.proceedButton,
+            selectedIndex === -1 && styles.disabled,
+          ]}
+          onPress={onProceed}
+        >
+          <Text style={styles.proceedText}>
+            {selectedIndex === -1 ? "Select Event Type" : "Proceed"}
+          </Text>
+        </Pressable>
+      </ResponsiveContainer>
       <InputDialog
         visible={showDialog}
         title="Add Event"
@@ -175,6 +182,10 @@ const styles = StyleSheet.create({
   backIcon: {
     width: 24,
     height: 24,
+  },
+
+  gridContainer: {
+    flex: 1,
   },
 
   grid: {

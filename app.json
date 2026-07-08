@@ -8,8 +8,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wedstoryes.app",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.wedstoryes.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,16 +22,13 @@
       "strings": {
         "app_name": "WedStoryes"
       },
-      "package": "com.wedstoryes.app",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.wedstoryes.app"
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
       "expo-router",
       [
         "expo-splash-screen",
