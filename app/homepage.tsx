@@ -73,22 +73,26 @@ export default function Homepage() {
           style={[styles.card, isSelected && styles.selectedBorder]}
         >
           <Image source={item.videoUri} style={styles.gif} />
-
-          {showDelete && (
-            <Pressable
-              style={styles.deleteButton}
-              onPress={() => {
-                setDeleteIndex(-1);
-                deleteEvent(item.id?.toString() ?? "");
-              }}
-            >
-              <Image
-                source={require("../assets/gifs/delete.gif")}
-                style={styles.deleteIcon}
-              />
-            </Pressable>
-          )}
         </Pressable>
+
+        {showDelete && (
+          <Pressable
+            hitSlop={8}
+            style={styles.deleteButton}
+            onPress={() => {
+              setDeleteIndex(-1);
+              if (selectedIndex === index) {
+                setSelectedIndex(-1);
+              }
+              deleteEvent(item.id?.toString() ?? "");
+            }}
+          >
+            <Image
+              source={require("../assets/gifs/delete.gif")}
+              style={styles.deleteIcon}
+            />
+          </Pressable>
+        )}
 
         <Text style={styles.itemText}>{item.title}</Text>
       </View>

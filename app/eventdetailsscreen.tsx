@@ -184,8 +184,7 @@ const EventDetailItem = ({
 
   return (
     <View style={[styles.card, { zIndex: 1000 - subEventIndex }]}>
-      <Pressable
-        onPress={() => setIsExpanded(!isExpanded)}
+      <View
         style={{
           flexDirection: "row",
           flex: 1,
@@ -193,11 +192,16 @@ const EventDetailItem = ({
           alignItems: "center",
         }}
       >
-        <Text style={styles.eventtitle}>{subEvent?.subEvent}</Text>
+        <Pressable
+          onPress={() => setIsExpanded(!isExpanded)}
+          style={{ flex: 1 }}
+        >
+          <Text style={styles.eventtitle}>{subEvent?.subEvent}</Text>
+        </Pressable>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Pressable
+            hitSlop={8}
             onPress={() => {
-              console.log(" first delete");
               deleteEvent();
             }}
           >
@@ -208,16 +212,18 @@ const EventDetailItem = ({
           </Pressable>
 
           <View style={{ width: 16 }} />
-          <Image
-            source={
-              isExpanded
-                ? require("../assets/images/up-arrow.png")
-                : require("../assets/images/arrow-down.png")
-            }
-            style={{ width: 18, height: 18 }}
-          />
+          <Pressable onPress={() => setIsExpanded(!isExpanded)}>
+            <Image
+              source={
+                isExpanded
+                  ? require("../assets/images/up-arrow.png")
+                  : require("../assets/images/arrow-down.png")
+              }
+              style={{ width: 18, height: 18 }}
+            />
+          </Pressable>
         </View>
-      </Pressable>
+      </View>
       <View style={isExpanded ? styles.expandedView : styles.collapsedView}>
         <Text style={styles.eventdescription}>{subEvent?.date}</Text>
         <View
