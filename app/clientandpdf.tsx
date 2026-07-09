@@ -32,25 +32,27 @@ export default function clientAndPdf() {
   const [price, setPrice] = useState("");
   const [discount, setDiscount] = useState("");
   const [terms, setTerms] = useState(
-    "1. 50,000/- advance to confirm the booking and balance on event day." +
+    "1. A non-refundable booking advance of 75,000/- is required to confirm the booking." +
       "\n" +
-      "2. Photos and videos will be delivered in 30-45 days, client selected pictures." +
+      "2. Balance amount: 1,50,000/- on the wedding day and 75,000/- before album printing." +
       "\n" +
-      "3. 60 sheets premium Albums set of 2 premium Albums Additional sheet cost 650 per sheet." +
+      "3. Package includes 3 premium Albums, 75 sheets in total. Additional sheet cost 650/- per sheet." +
       "\n" +
-      "4. Full length documentary Teaser." +
+      "4. Client must complete album photo selection within 30 days of receiving the selection gallery. Delay beyond this may result in revised album pricing." +
       "\n" +
-      "5. Three traditional full length videos." +
+      "5. Album design will be shared for approval. Reasonable revisions will be made before final printing." +
       "\n" +
-      "6. On wedding day client have to pay 1,00,000/- Once Album design completed, If any change's Is their we will be reedit it.printing sending day we will ask 40,000/-Albums videos will be delivered 15-20 days." +
+      "6. Edited photos and videos will be delivered in 30-45 days after client's photo selection is completed. Wedding videos will be delivered in 15-20 days." +
       "\n" +
-      "7. Client have to purchase 2 hard disks" +
+      "7. Package includes one cinematic documentary Teaser and three traditional full length wedding videos." +
       "\n" +
-      "8. Advance amount not refundable. Not applicable for another event." +
+      "8. Client have to purchase 2 hard disks for final data delivery." +
       "\n" +
-      "9. Advance 50,000/- wedding day 1,00,000/- album printing day 40,000/-." +
+      "9. Stay, food and local transportation for the photography team, if required, client only Accommodate." +
       "\n" +
-      "10. Stay and food Allowances client only Accommodate." +
+      "10. Advance amount not refundable, not applicable for another event." +
+      "\n" +
+      "11. By confirming the booking, client agrees to all the above terms and conditions." +
       "\n",
   );
   const MIN_HEIGHT = 10 * 20;

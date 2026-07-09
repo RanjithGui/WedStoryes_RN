@@ -183,11 +183,9 @@ const EventDetailItem = ({
   }
 
   return (
-    <Pressable
-      style={[styles.card, { zIndex: 1000 - subEventIndex }]}
-      onPress={() => setIsExpanded(!isExpanded)}
-    >
-      <View
+    <View style={[styles.card, { zIndex: 1000 - subEventIndex }]}>
+      <Pressable
+        onPress={() => setIsExpanded(!isExpanded)}
         style={{
           flexDirection: "row",
           flex: 1,
@@ -219,7 +217,7 @@ const EventDetailItem = ({
             style={{ width: 18, height: 18 }}
           />
         </View>
-      </View>
+      </Pressable>
       <View style={isExpanded ? styles.expandedView : styles.collapsedView}>
         <Text style={styles.eventdescription}>{subEvent?.date}</Text>
         <View
@@ -454,7 +452,7 @@ const EventDetailItem = ({
           </View>
         )}
       </View>
-    </Pressable>
+    </View>
   );
 };
 
