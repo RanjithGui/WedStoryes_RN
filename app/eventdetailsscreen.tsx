@@ -5,7 +5,6 @@ import { SubEventDetails } from "@/types/types";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -160,22 +159,23 @@ const EventDetailItem = ({
   };
   const deleteSubEvent = useGlobalStore((s) => s.deletesubEvent);
   const deleteEvent = () => {
-    Alert.alert(
-      "Delete Sub-Event",
-      "Are you sure you want to delete this sub-event?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => handleDeleteSubEvent(),
-        },
-      ],
-      { cancelable: true },
-    );
+    handleDeleteSubEvent();
+    // Alert.alert(
+    //   "Delete Sub-Event",
+    //   "Are you sure you want to delete this sub-event?",
+    //   [
+    //     {
+    //       text: "Cancel",
+    //       style: "cancel",
+    //     },
+    //     {
+    //       text: "Delete",
+    //       style: "destructive",
+    //       onPress: () => handleDeleteSubEvent(),
+    //     },
+    //   ],
+    //   { cancelable: true },
+    // );
   };
 
   function handleDeleteSubEvent() {
@@ -202,6 +202,7 @@ const EventDetailItem = ({
           <Pressable
             hitSlop={8}
             onPress={() => {
+              console.log("Delete Sub-Event Pressed");
               deleteEvent();
             }}
           >
