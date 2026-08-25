@@ -43,11 +43,25 @@ export default function PDFPreview() {
     const loadLogo = async () => {
       try {
         const asset = Asset.fromModule(require("../assets/images/logo.png"));
-        await asset.downloadAsync();
-        const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        setLogoBase64(`data:image/png;base64,${base64}`);
+        if (Platform.OS === "web") {
+          // expo-file-system has no real implementation on web, so read the
+          // bundled asset URL directly via fetch + FileReader instead.
+          const response = await fetch(asset.uri);
+          const blob = await response.blob();
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          setLogoBase64(base64);
+        } else {
+          await asset.downloadAsync();
+          const base64 = await FileSystem.readAsStringAsync(asset.localUri!, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          setLogoBase64(`data:image/png;base64,${base64}`);
+        }
       } catch (error) {
         console.log("Logo load error:", error);
       }
@@ -402,6 +416,24 @@ export default function PDFPreview() {
   };
 
   const handleDownload = async () => {
+    if (Platform.OS === "web") {
+      const frame = iframeRef.current;
+      if (!frame?.contentWindow) {
+        Alert.alert("Error", "Preview not ready yet. Please try again.");
+        return;
+      }
+      // Reset zoom so the preview transform doesn't affect the printed layout.
+      frame.style.transform = "";
+      frame.style.width = "100%";
+      frame.style.height = "100%";
+      setZoom(1.0);
+      // Print the iframe's own document (not the outer app page), so only the
+      // quotation content is printed and its A4 @page rules apply.
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+      return;
+    }
+
     try {
       const html = buildHtml(logoBase64);
       const { uri } = await Print.printToFileAsync({
