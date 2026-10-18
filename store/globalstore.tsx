@@ -113,11 +113,10 @@ export const useGlobalStore = create<GlobalStore>()(
           const details = event.eventDetails ? [...event.eventDetails] : [];
           const subEvent = details[subEventIndex];
           if (subEvent) {
-            subEvent.photographers = {
-              ...subEvent.photographers,
-              [type]: count,
+            details[subEventIndex] = {
+              ...subEvent,
+              photographers: { ...subEvent.photographers, [type]: count },
             };
-            details[subEventIndex] = subEvent;
             events[eventIndex] = { ...event, eventDetails: details };
             set({ events });
           }
@@ -130,11 +129,10 @@ export const useGlobalStore = create<GlobalStore>()(
           const details = event.eventDetails ? [...event.eventDetails] : [];
           const subEvent = details[subEventIndex];
           if (subEvent) {
-            subEvent.videographers = {
-              ...subEvent.videographers,
-              [type]: count,
+            details[subEventIndex] = {
+              ...subEvent,
+              videographers: { ...subEvent.videographers, [type]: count },
             };
-            details[subEventIndex] = subEvent;
             events[eventIndex] = { ...event, eventDetails: details };
             set({ events });
           }
@@ -286,8 +284,7 @@ export const useGlobalStore = create<GlobalStore>()(
             const details = e.eventDetails ? [...e.eventDetails] : [];
             const subEvent = details[subEventIndex];
             if (subEvent) {
-              subEvent.selectedAddons = addon;
-              details[subEventIndex] = subEvent;
+              details[subEventIndex] = { ...subEvent, selectedAddons: addon };
               return { ...e, eventDetails: details };
             }
           }

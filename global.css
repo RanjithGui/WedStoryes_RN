@@ -1,0 +1,7 @@
+/* Tailwind entry for the web build. Only imported from *.web.tsx files. */
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}

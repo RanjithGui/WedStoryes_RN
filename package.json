@@ -23,6 +23,7 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "clsx": "^2.1.1",
     "expo": "~54.0.31",
     "expo-auth-session": "~7.0.10",
     "expo-av": "~16.0.8",
@@ -43,7 +44,9 @@
     "expo-video": "~3.0.15",
     "expo-web-browser": "~15.0.10",
     "firebase": "^12.10.0",
+    "framer-motion": "^14.3.0",
     "graphql": "^16.13.0",
+    "lucide-react": "^1.59.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
@@ -61,13 +64,17 @@
     "react-native-webview": "^13.16.0",
     "react-native-worklets": "0.5.1",
     "serve": "^14.2.6",
+    "tailwind-merge": "^3.7.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@react-native-community/cli": "latest",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "postcss": "^8.5.30",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.9.2"
   },
   "private": true
