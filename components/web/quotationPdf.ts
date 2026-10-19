@@ -148,7 +148,7 @@ export async function downloadQuotationPdf(html: string, fileName: string) {
       );
     }
 
-    pdf.save(`${fileName.replace(/[\\/:*?"<>|]+/g, "").trim() || "Quotation"}.pdf`);
+    pdf.save(`${fileName.replace(/[\\/:*?"<>|]+/g, "").trim() || "quotation.wedstoryes"}.pdf`);
   } finally {
     restoreImgStyles();
     frame.remove();

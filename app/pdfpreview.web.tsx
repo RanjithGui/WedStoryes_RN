@@ -66,13 +66,16 @@ export default function QuotationPage() {
 
   const client = event?.clientDetails;
   const docTitle = ["Quotation", client?.name, event?.title].filter(Boolean).join(" - ");
+  // Saved as "quotation-<Client name>.wedstoryes.pdf".
+  const clientName = client?.name?.trim();
+  const fileName = clientName ? `quotation-${clientName}.wedstoryes` : "quotation.wedstoryes";
 
   const onFrameLoad = () => {
     const doc = frameRef.current?.contentDocument;
     if (!doc) return;
     doc.body.style.background = "transparent";
     // Browsers use the printed document's title as the default PDF filename.
-    doc.title = docTitle;
+    doc.title = fileName;
     const fitted = fitZoom();
     if (fitted < 1) setZoom(fitted);
     applyZoom(fitted < 1 ? fitted : zoom);
@@ -82,7 +85,7 @@ export default function QuotationPage() {
     setDownloading(true);
     setDownloadError(null);
     try {
-      await downloadQuotationPdf(buildQuotationHtml(event, logo), docTitle);
+      await downloadQuotationPdf(buildQuotationHtml(event, logo), fileName);
     } catch (error) {
       console.log("PDF ERROR:", error);
       setDownloadError("Couldn't create the PDF. Please try again.");
