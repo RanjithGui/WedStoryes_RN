@@ -132,7 +132,13 @@ export const buildQuotationHtml = (
   }
 
   @media print {
-    body { background: white; padding: 0; margin: 0; }
+    /* The web preview zooms the body to fit small screens; mobile browsers
+       print asynchronously, so never let that zoom reach the PDF. */
+    body { background: white; padding: 0; margin: 0; zoom: 1 !important; }
+    /* Pages are scaled down to fit A4, which can shrink 1px lines below a
+       device pixel; use 1pt so the grid survives the scaling. */
+    table { border-top-width: 1pt; border-left-width: 1pt; }
+    th, td { border-right-width: 1pt; border-bottom-width: 1pt; }
     .page {
       box-shadow: none;
       margin: 0; padding: 0;
@@ -162,15 +168,22 @@ export const buildQuotationHtml = (
     margin: 16px 0;
   }
 
+  /* Separate borders (top/left on the table, right/bottom on cells) instead
+     of border-collapse: WebKit's print renderer (iOS Safari, expo-print)
+     drops collapsed borders next to the red header backgrounds. */
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
     margin-top: 12px;
     font-size: 11px;
   }
 
   th, td {
-    border: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
     padding: 5px 7px;
     text-align: center;
     vertical-align: middle;

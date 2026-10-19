@@ -78,11 +78,10 @@ export default function QuotationPage() {
   const download = () => {
     const win = frameRef.current?.contentWindow;
     if (!win) return;
-    // Print the quotation at 100% so the A4 @page layout is unaffected.
-    applyZoom(1);
+    // The template's print styles reset the preview zoom, so this works even
+    // where print() returns before the PDF is rendered (mobile browsers).
     win.focus();
     win.print();
-    applyZoom(zoom);
   };
 
   if (!hydrated) {
