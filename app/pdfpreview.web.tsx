@@ -9,6 +9,7 @@ import {
   useStoreHydrated,
   WebShell,
 } from "@/components/web/ui";
+import { downloadQuotationPdf } from "@/components/web/quotationPdf";
 import { buildQuotationHtml } from "@/utils/quotationHtml";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -27,6 +28,8 @@ export default function QuotationPage() {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [logo, setLogo] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   // Inline the logo as a data URL so it survives printing from srcDoc.
   useEffect(() => {
@@ -75,7 +78,20 @@ export default function QuotationPage() {
     applyZoom(fitted < 1 ? fitted : zoom);
   };
 
-  const download = () => {
+  const download = async () => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      await downloadQuotationPdf(buildQuotationHtml(event, logo), docTitle);
+    } catch (error) {
+      console.log("PDF ERROR:", error);
+      setDownloadError("Couldn't create the PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const print = () => {
     const win = frameRef.current?.contentWindow;
     if (!win) return;
     // The template's print styles reset the preview zoom, so this works even
@@ -143,11 +159,33 @@ export default function QuotationPage() {
           <NavLink href="/clientandpdf" className="ws-btn ws-btn-outline">
             <Icon name="pencil" size={15} /> Edit details
           </NavLink>
-          <button type="button" className="ws-btn ws-btn-primary" onClick={download}>
-            <Icon name="printer" size={16} /> Download PDF
+          <button
+            type="button"
+            className="ws-icon-btn"
+            aria-label="Print"
+            title="Print"
+            onClick={print}
+          >
+            <Icon name="printer" size={18} />
+          </button>
+          <button
+            type="button"
+            className="ws-btn ws-btn-primary"
+            disabled={downloading}
+            onClick={download}
+          >
+            <Icon name="download" size={16} />
+            {downloading ? "Preparing…" : "Download PDF"}
           </button>
         </div>
       </div>
+
+      {downloadError && (
+        <div className="ws-banner" role="alert">
+          <Icon name="x" />
+          <span>{downloadError}</span>
+        </div>
+      )}
 
       {!client?.name && (
         <div className="ws-banner">
@@ -169,9 +207,6 @@ export default function QuotationPage() {
           onLoad={onFrameLoad}
         />
       </div>
-      <p className="ws-muted" style={{ fontSize: 13 }}>
-        Tip: in the print dialog, choose <strong>Save as PDF</strong> as the destination.
-      </p>
     </WebShell>
   );
 }

@@ -1,4 +1,5 @@
 // Learn more https://docs.expo.dev/guides/customizing-metro
+const path = require("path");
 const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
@@ -22,12 +23,21 @@ const tslibCjsPath = require.resolve("tslib/tslib.js");
 // has no import.meta and is what native (react-native condition) already resolves to.
 const zustandMiddlewareCjsPath = require.resolve("zustand/middleware");
 
+// jspdf (web-only PDF download) resolves to dist/jspdf.node.min.js under the
+// "node" exports condition used by the static web render, and that build has
+// an AMD-style `require(["html2canvas"], cb)` call Metro rejects. Always use
+// the browser ES build; it's only ever executed in the browser anyway.
+const jspdfBrowserPath = path.resolve(__dirname, "node_modules/jspdf/dist/jspdf.es.min.js");
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === "tslib" || moduleName === "tslib/") {
     return { type: "sourceFile", filePath: tslibCjsPath };
   }
   if (moduleName === "zustand/middleware" || moduleName === "zustand/middleware/") {
     return { type: "sourceFile", filePath: zustandMiddlewareCjsPath };
+  }
+  if (moduleName === "jspdf") {
+    return { type: "sourceFile", filePath: jspdfBrowserPath };
   }
   return context.resolveRequest(context, moduleName, platform);
 };
